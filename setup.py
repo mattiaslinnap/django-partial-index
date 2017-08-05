@@ -7,13 +7,14 @@ except ImportError:
 
 setup(
     name='django-partial-index',
-    packages=['partial_index'],  # this must be the same as the name above
-    version='0.1',
+    packages=['partial_index'],
+    version='0.1.0',
     description='PostgreSQL partial indexes for Django',
+    long_description=open("README.md").read(),
     author='Mattias Linnap',
     author_email='mattias@linnap.com',
     url='https://github.com/mattiaslinnap/django-partial-index',
-    download_url='https://github.com/mattiaslinnap/django-partial-index/archive/0.1.tar.gz',  # I'll explain this in a second
+    download_url='https://github.com/mattiaslinnap/django-partial-index/archive/0.1.0.tar.gz',
     license='BSD',
     install_requires=[],
     classifiers=[
