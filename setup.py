@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
+
 
 setup(
     name='django-partial-index',
     packages=['partial_index'],
     version='0.1.0',
     description='PostgreSQL partial indexes for Django',
-    long_description=open("README.md").read(),
+    long_description=open('README.md').read(),
     author='Mattias Linnap',
     author_email='mattias@linnap.com',
     url='https://github.com/mattiaslinnap/django-partial-index',
