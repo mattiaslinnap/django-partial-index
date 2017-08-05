@@ -57,6 +57,6 @@ But the constraints are part of the business logic, and best kept close to the m
 * Add tests.
 * Test on Python versions older than 3.6.
 * Add import and version checks to print nice errors when Django 1.11 is not installed.
-* Replace `where='some sql expression'` with (Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
+* Replace `where='some sql expression'` with [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
 * Add support for SQLite.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
