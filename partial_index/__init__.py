@@ -1,4 +1,21 @@
-import django.db.backends.postgresql.schema
+# Provide a nicer error message than failing to import models.Index.
+
+VERSION = (0, 1, 1)
+__version__ = '.'.join(str(v) for v in VERSION)
+
+
+MIN_DJANGO_VERSION = (1, 11)
+DJANGO_VERSION_ERROR = 'Django version %s or later is required for django-partial-index.' % '.'.join(str(v) for v in MIN_DJANGO_VERSION)
+
+try:
+    import django
+except ImportError:
+    raise ImportError(DJANGO_VERSION_ERROR)
+
+if tuple(django.VERSION[:2]) < MIN_DJANGO_VERSION:
+    raise ImportError(DJANGO_VERSION_ERROR)
+
+
 from django.db.models import Index
 
 
@@ -6,21 +23,25 @@ class PartialIndex(Index):
     suffix = 'partial'
     # Allow an index name longer than 30 characters since this index can only be used on PostgreSQL and SQLite,
     # and the Django default 30 character limit for cross-database compatibility isn't applicable.
-    # PostgreSQL limit is 63 and SQLite does not have a limit.
-    max_name_length = 60
-    sql_create_index = "CREATE%(unique)s INDEX %(name)s ON %(table)s%(using)s (%(columns)s)%(extra)s WHERE %(where)s"
+    # The "partial" suffix is 4 letters longer than the default "idx".
+    max_name_length = 34
+    sql_create_index = {
+        'postgresql': 'CREATE%(unique)s INDEX %(name)s ON %(table)s%(using)s (%(columns)s)%(extra)s WHERE %(where)s',
+        'sqlite': 'CREATE%(unique)s INDEX %(name)s ON %(table)s%(using)s (%(columns)s) WHERE %(where)s',
+    }
 
+    # Mutable default fields=[] looks wrong, but it's copied from super class.
     def __init__(self, fields=[], name=None, unique=None, where=''):
         if unique not in [True, False]:
-            raise ValueError('unique must be True or False.')
+            raise ValueError('unique must be True or False')
         if not where:
-            raise ValueError('where predicate must be provided.')
+            raise ValueError('where predicate must be provided')
         self.unique = unique
         self.where = where
         super(PartialIndex, self).__init__(fields, name)
 
     def __repr__(self):
-        return '<%(name)s: fields=%(fields)s, unique=%(unique)s, where="%(where)s">' % {
+        return "<%(name)s: fields=%(fields)s, unique=%(unique)s, where='%(where)s'>" % {
             'name': self.__class__.__name__,
             'fields': "'{}'".format(', '.join(self.fields)),
             'unique': self.unique,
@@ -42,9 +63,11 @@ class PartialIndex(Index):
         return parameters
 
     def create_sql(self, model, schema_editor, using=''):
-        if not isinstance(schema_editor, django.db.backends.postgresql.schema.DatabaseSchemaEditor):
-            raise ValueError('PartialIndex so far only supports the PostgreSQL backend. SQLite could be added, MySQL and Oracle do not support them at all.')
+        vendor = schema_editor.connection.vendor
+        if vendor not in self.sql_create_index:
+            raise ValueError('Database vendor %s is not supported for django-partial-index.' % vendor)
+
         # Only change from super function - override query template to insert optional UNIQUE at start, and WHERE at the end.
-        sql_create_index = self.sql_create_index
+        sql_template = self.sql_create_index[vendor]
         sql_parameters = self.get_sql_create_template_values(model, schema_editor, using)
-        return sql_create_index % sql_parameters
+        return sql_template % sql_parameters
