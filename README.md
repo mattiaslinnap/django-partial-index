@@ -7,9 +7,10 @@ Partial (sometimes also called filtered or conditional) index support for Django
 With partial indexes, only some subset of the rows in the table have corresponding index entries.
 This can be useful for optimizing index size and query speed, and to add unique constraints for only selected rows.
 
-https://www.postgresql.org/docs/current/static/indexes-partial.html
+More info on partial indexes:
 
-https://sqlite.org/partialindex.html
+* https://www.postgresql.org/docs/current/static/indexes-partial.html
+* https://sqlite.org/partialindex.html
 
 
 ## Install
@@ -67,8 +68,20 @@ for either database is planned for a future version.
 Of course, these (unique) indexes could be created by a handwritten [RunSQL migration](https://docs.djangoproject.com/en/1.11/ref/migration-operations/#runsql).
 But the constraints are part of the business logic, and best kept close to the model definitions.
 
+## Version History
 
-## TODOs
+### 0.2.0 (latest)
+* Fully tested SQLite and PostgreSQL support.
+* Tests for generated SQL statements, adding and removing indexes, and that unique constraints work when inserting rows into the db tables.
+* Python 2.7, 3.4, 3.5, 3.6 support.
+
+### 0.1.1
+* Experimental SQLite support.
+
+### 0.1.0
+* First release, working but untested PostgreSQL support.
+
+## Future plans
 
 * Replace `where='some sql expression'` with [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
