@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
     name='django-partial-index',
     packages=['partial_index'],
-    version='0.1.0',
+    version='0.1.1',
     description='PostgreSQL partial indexes for Django',
     long_description=open('README.md').read(),
     author='Mattias Linnap',
