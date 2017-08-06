@@ -69,6 +69,5 @@ But the constraints are part of the business logic, and best kept close to the m
 ## TODOs
 
 * Test on Python versions older than 3.6.
-* More thorough tests.
 * Replace `where='some sql expression'` with [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
