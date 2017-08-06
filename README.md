@@ -1,5 +1,7 @@
 # django-partial-index
 
+[![Build Status](https://api.travis-ci.org/mattiaslinnap/django-partial-index.svg?branch=master)](https://travis-ci.org/mattiaslinnap/django-partial-index)
+
 Partial (sometimes also called filtered or conditional) index support for Django.
 
 With partial indexes, only some subset of the rows in the table have corresponding index entries.
@@ -18,7 +20,7 @@ Requirements:
 
 * Django 1.11 or later.
 * PostgreSQL or SQLite database backend. (Partial indexes are not supported on MySQL, and require major hackery on Oracle.)
-
+* Python 2.7, 3.4, 3.5, or 3.6. Other versions will probably work as well, but have not been tested yet.
 
 ## Usage
 
@@ -68,6 +70,5 @@ But the constraints are part of the business logic, and best kept close to the m
 
 ## TODOs
 
-* Test on Python versions older than 3.6.
 * Replace `where='some sql expression'` with [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
