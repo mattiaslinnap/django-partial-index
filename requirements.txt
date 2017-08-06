@@ -1,0 +1,4 @@
+# The package does not define dependencies, but they are required for tests.
+
+Django>=1.11
+psycopg2
