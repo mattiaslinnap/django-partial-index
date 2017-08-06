@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 from os.path import abspath, dirname, join
 import subprocess
