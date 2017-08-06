@@ -57,6 +57,11 @@ class Job(models.Model):
         ]
 ```
 
+Note that the where-expression is directly inserted into the `CREATE INDEX` sql statement, and must be valid for your database backend.
+This means that you would have to use `where='is_complete = false` on PostgreSQL and `where='is_complete = 0'` on SQLite for the Job model.
+Using [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that check the syntax and generate valid SQL
+for either database is planned for a future version.
+
 Of course, these (unique) indexes could be created by a handwritten [RunSQL migration](https://docs.djangoproject.com/en/1.11/ref/migration-operations/#runsql).
 But the constraints are part of the business logic, and best kept close to the model definitions.
 
