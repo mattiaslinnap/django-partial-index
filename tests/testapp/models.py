@@ -21,7 +21,7 @@ class RoomBooking(models.Model):
 
 
 class Job(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField()
     # Using IntegerField instead of BooleanField in the test, since PostgreSQL and SQLite have different boolean literals.
     # In real projects it is your job to use a where='' expression that is valid for your selected database backend.
     is_complete = models.IntegerField(default=0)

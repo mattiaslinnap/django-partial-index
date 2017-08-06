@@ -8,6 +8,8 @@ from partial_index import PartialIndex
 
 
 class PartialIndexTest(SimpleTestCase):
+    """Test simple fields and methods on the PartialIndex class."""
+
     def setUp(self):
         self.idx = PartialIndex(fields=['a', 'b'], unique=True, where='a IS NULL')
 
