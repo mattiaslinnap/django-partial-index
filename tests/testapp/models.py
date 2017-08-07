@@ -26,10 +26,12 @@ class RoomBooking(models.Model):
 
 
 class Job(models.Model):
-    created_at = models.DateTimeField()
-    # Using IntegerField instead of BooleanField in the test, since PostgreSQL and SQLite have different boolean literals.
-    # In real projects it is your job to use a where='' expression that is valid for your selected database backend.
-    is_complete = models.IntegerField(default=0)
+    order = models.IntegerField()
+    group = models.IntegerField()
+    is_complete = models.BooleanField(default=False)
 
     class Meta:
-        indexes = [PartialIndex(fields=['-created_at'], unique=False, where='is_complete = 0')]
+        indexes = [
+            PartialIndex(fields=['-order'], unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0'),
+            PartialIndex(fields=['group'], unique=True, where_postgresql='is_complete = false', where_sqlite='is_complete = 0'),
+        ]

@@ -1,6 +1,6 @@
 # Provide a nicer error message than failing to import models.Index.
 
-VERSION = (0, 2, 1)
+VERSION = (0, 3, 0)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
@@ -31,49 +31,74 @@ class PartialIndex(Index):
     }
 
     # Mutable default fields=[] looks wrong, but it's copied from super class.
-    def __init__(self, fields=[], name=None, unique=None, where=''):
+    def __init__(self, fields=[], name=None, unique=None, where='', where_postgresql='', where_sqlite=''):
         if unique not in [True, False]:
-            raise ValueError('unique must be True or False')
-        if not where:
-            raise ValueError('where predicate must be provided')
+            raise ValueError('Unique must be True or False')
+        if where:
+            if where_postgresql or where_sqlite:
+                raise ValueError('If providing a single where predicate, must not provide where_postgresql or where_sqlite')
+        else:
+            if not where_postgresql and not where_sqlite:
+                raise ValueError('At least one where predicate must be provided')
+            if where_postgresql == where_sqlite:
+                raise ValueError('If providing a separate where_postgresql and where_sqlite, then they must be different.' +
+                                 'If the same expression works for both, just use single where.')
         self.unique = unique
         self.where = where
+        self.where_postgresql = where_postgresql
+        self.where_sqlite = where_sqlite
         super(PartialIndex, self).__init__(fields, name)
 
     def __repr__(self):
-        return "<%(name)s: fields=%(fields)s, unique=%(unique)s, where='%(where)s'>" % {
+        if self.where:
+            anywhere = "where='%s'" % self.where
+        else:
+            anywhere = "where_postgresql='%s', where_sqlite='%s'" % (self.where_postgresql, self.where_sqlite)
+
+        return "<%(name)s: fields=%(fields)s, unique=%(unique)s, %(anywhere)s>" % {
             'name': self.__class__.__name__,
             'fields': "'{}'".format(', '.join(self.fields)),
             'unique': self.unique,
-            'where': self.where,
+            'anywhere': anywhere
         }
 
     def deconstruct(self):
         path, args, kwargs = super(PartialIndex, self).deconstruct()
         kwargs['unique'] = self.unique
         kwargs['where'] = self.where
+        kwargs['where_postgresql'] = self.where_postgresql
+        kwargs['where_sqlite'] = self.where_sqlite
         return path, args, kwargs
+
+    def get_valid_vendor(self, schema_editor):
+        vendor = schema_editor.connection.vendor
+        if vendor not in self.sql_create_index:
+            raise ValueError('Database vendor %s is not supported for django-partial-index.' % vendor)
+        return vendor
 
     def get_sql_create_template_values(self, model, schema_editor, using):
         parameters = super(PartialIndex, self).get_sql_create_template_values(model, schema_editor, using)
         parameters['unique'] = ' UNIQUE' if self.unique else ''
         # Note: the WHERE predicate is not yet checked for syntax or field names, and is inserted into the CREATE INDEX query unescaped.
         # This is bad for usability, but is not a security risk, as the string cannot come from user input.
-        parameters['where'] = self.where
+        vendor = self.get_valid_vendor(schema_editor)
+        if vendor == 'postgresql':
+            parameters['where'] = self.where_postgresql or self.where
+        elif vendor == 'sqlite':
+            parameters['where'] = self.where_sqlite or self.where
+        else:
+            raise ValueError('Should never happen')
         return parameters
 
     def create_sql(self, model, schema_editor, using=''):
-        vendor = schema_editor.connection.vendor
-        if vendor not in self.sql_create_index:
-            raise ValueError('Database vendor %s is not supported for django-partial-index.' % vendor)
-
+        vendor = self.get_valid_vendor(schema_editor)
         # Only change from super function - override query template to insert optional UNIQUE at start, and WHERE at the end.
         sql_template = self.sql_create_index[vendor]
         sql_parameters = self.get_sql_create_template_values(model, schema_editor, using)
         return sql_template % sql_parameters
 
     def name_hash_extra_data(self):
-        return [str(self.unique), self.where]
+        return [str(self.unique), self.where, self.where_postgresql, self.where_sqlite]
 
     def set_name_with_model(self, model):
         """Sets an unique generated name for the index.

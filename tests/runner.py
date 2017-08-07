@@ -34,7 +34,7 @@ def main(args):
     django.setup()
 
     from django.test.runner import DiscoverRunner
-    test_runner = DiscoverRunner(top_level=TESTS_DIR, interactive=False, keepdb=True)
+    test_runner = DiscoverRunner(top_level=TESTS_DIR, interactive=False, keepdb=False)
     failures = test_runner.run_tests(['tests'])
     if failures:
         sys.exit(1)

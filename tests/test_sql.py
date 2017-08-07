@@ -10,7 +10,8 @@ from testapp.models import RoomBooking, Job
 
 
 ROOMBOOKING_SQL = r'^CREATE UNIQUE INDEX "testapp_[a-zA-Z0-9_]+_partial" ON "testapp_roombooking" \("user_id", "room_id"\) WHERE deleted_at IS NULL;?$'
-JOB_SQL = r'^CREATE INDEX "testapp_[a-zA-Z0-9_]+_partial" ON "testapp_job" \("created_at" DESC\) WHERE is_complete = 0;?$'
+JOB_NONUNIQUE_SQL = r'^CREATE INDEX "testapp_[a-zA-Z0-9_]+_partial" ON "testapp_job" \("order" DESC\) WHERE is_complete = %s;?$'
+JOB_UNIQUE_SQL = r'^CREATE UNIQUE INDEX "testapp_[a-zA-Z0-9_]+_partial" ON "testapp_job" \("group"\) WHERE is_complete = %s;?$'
 
 
 class PartialIndexSqlTest(TestCase):
@@ -28,6 +29,9 @@ class PartialIndexSqlTest(TestCase):
                 break
         self.assertTrue(found, 'Pattern matching \"%s\" not found in %s' % (pattern, texts))
 
+    def false(self, editor):
+        return 'false' if editor.connection.vendor == 'postgresql' else '0'
+
     def test_roombooking_createsql(self):
         with self.schema_editor() as editor:
             sql = RoomBooking._meta.indexes[0].create_sql(RoomBooking, editor)
@@ -41,12 +45,14 @@ class PartialIndexSqlTest(TestCase):
     def test_job_createsql(self):
         with self.schema_editor() as editor:
             sql = Job._meta.indexes[0].create_sql(Job, editor)
-        self.assertRegex(sql, JOB_SQL)
+            self.assertRegex(sql, JOB_NONUNIQUE_SQL % self.false(editor))
 
     def test_job_create_model(self):
         with self.schema_editor() as editor:
             editor.create_model(Job)
-        self.assertContainsMatch(editor.collected_sql, JOB_SQL)
+            f = self.false(editor)
+        self.assertContainsMatch(editor.collected_sql, JOB_NONUNIQUE_SQL % f)
+        self.assertContainsMatch(editor.collected_sql, JOB_UNIQUE_SQL % f)
 
 
 class PartialIndexCreateTest(TestCase):
@@ -90,12 +96,12 @@ class PartialIndexCreateTest(TestCase):
 
         # Add the index
         index_name = 'job_test_idx'
-        index = PartialIndex(fields=['-created_at'], name=index_name, unique=False, where='is_complete = 0')
+        index = PartialIndex(fields=['-group'], name=index_name, unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0')
         with self.schema_editor() as editor:
             editor.add_index(Job, index)
         constraints = self.get_constraints(Job)
         self.assertEqual(len(constraints), num_constraints_before + 1)
-        self.assertEqual(constraints[index_name]['columns'], ['created_at'])
+        self.assertEqual(constraints[index_name]['columns'], ['group'])
         self.assertEqual(constraints[index_name]['orders'], ['DESC'])
         self.assertEqual(constraints[index_name]['primary_key'], False)
         self.assertEqual(constraints[index_name]['check'], False)

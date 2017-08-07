@@ -8,7 +8,7 @@ from django.utils import timezone
 from testapp.models import User, Room, RoomBooking, Job
 
 
-class PartialIndexModelTest(TestCase):
+class PartialIndexRoomBookingTest(TestCase):
     """Test that partial unique constraints work as expected when inserting data to the db.
 
     Models and indexes are created when django creates the test db, they do not need to be set up.
@@ -40,8 +40,28 @@ class PartialIndexModelTest(TestCase):
         with self.assertRaises(IntegrityError):
             RoomBooking.objects.create(user=self.user1, room=self.room1)
 
-    def test_job_same(self):
-        now = timezone.now()
-        job1 = Job.objects.create(created_at=now)
-        job2 = Job.objects.create(created_at=now)
-        self.assertEqual(job1.created_at, job2.created_at)
+
+class PartialIndexJobTest(TestCase):
+    """Test that partial unique constraints work as expected when inserting data to the db.
+
+    Models and indexes are created when django creates the test db, they do not need to be set up.
+    """
+    def test_job_same_id(self):
+        job1 = Job.objects.create(order=1, group=1)
+        job2 = Job.objects.create(order=1, group=2)
+        self.assertEqual(job1.order, job2.order)
+
+    def test_job_same_group(self):
+        Job.objects.create(order=1, group=1)
+        with self.assertRaises(IntegrityError):
+            Job.objects.create(order=2, group=1)
+
+    def test_job_complete_same_group(self):
+        job1 = Job.objects.create(order=1, group=1, is_complete=True)
+        job2 = Job.objects.create(order=1, group=1)
+        self.assertEqual(job1.order, job2.order)
+
+    def test_job_complete_later_same_group(self):
+        job1 = Job.objects.create(order=1, group=1)
+        job2 = Job.objects.create(order=1, group=1, is_complete=True)
+        self.assertEqual(job1.order, job2.order)
