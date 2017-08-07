@@ -21,7 +21,7 @@ Requirements:
 
 * Django 1.11 or later.
 * PostgreSQL or SQLite database backend. (Partial indexes are not supported on MySQL, and require major hackery on Oracle.)
-* Python 2.7, 3.4, 3.5, or 3.6. Other versions will probably work as well, but have not been tested yet.
+* Python 2.7 and 3.4 - 3.6. (All Python versions supported by Django 1.11.)
 
 ## Usage
 
@@ -70,10 +70,13 @@ But the constraints are part of the business logic, and best kept close to the m
 
 ## Version History
 
-### 0.2.0 (latest)
+## 0.2.1 (latest)
+* Ensure that automatically generated index names depend on the "unique" and "where" parameters. Otherwise two indexes with the same fields would be considered identical by Django.
+
+### 0.2.0
 * Fully tested SQLite and PostgreSQL support.
 * Tests for generated SQL statements, adding and removing indexes, and that unique constraints work when inserting rows into the db tables.
-* Python 2.7, 3.4, 3.5, 3.6 support.
+* Python 2.7, 3.4-3.6 support.
 
 ### 0.1.1
 * Experimental SQLite support.

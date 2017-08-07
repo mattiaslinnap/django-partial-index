@@ -1,6 +1,6 @@
 # Provide a nicer error message than failing to import models.Index.
 
-VERSION = (0, 2, 0)
+VERSION = (0, 2, 1)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
@@ -71,3 +71,31 @@ class PartialIndex(Index):
         sql_template = self.sql_create_index[vendor]
         sql_parameters = self.get_sql_create_template_values(model, schema_editor, using)
         return sql_template % sql_parameters
+
+    def name_hash_extra_data(self):
+        return [str(self.unique), self.where]
+
+    def set_name_with_model(self, model):
+        """Sets an unique generated name for the index.
+
+        PartialIndex would like to only override "hash_data = ...", but the entire method must be duplicated for that.
+        """
+        table_name = model._meta.db_table
+        column_names = [model._meta.get_field(field_name).column for field_name, order in self.fields_orders]
+        column_names_with_order = [
+            (('-%s' if order else '%s') % column_name)
+            for column_name, (field_name, order) in zip(column_names, self.fields_orders)
+        ]
+        # The length of the parts of the name is based on the default max
+        # length of 30 characters.
+        hash_data = [table_name] + column_names_with_order + [self.suffix] + self.name_hash_extra_data()
+        self.name = '%s_%s_%s' % (
+            table_name[:11],
+            column_names[0][:7],
+            '%s_%s' % (self._hash_generator(*hash_data), self.suffix),
+        )
+        assert len(self.name) <= self.max_name_length, (
+            'Index too long for multiple database support. Is self.suffix '
+            'longer than 3 characters?'
+        )
+        self.check_name()

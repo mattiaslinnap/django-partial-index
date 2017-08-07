@@ -3,6 +3,11 @@ from django.db import models
 from partial_index import PartialIndex
 
 
+class AB(models.Model):
+    a = models.CharField(max_length=50)
+    b = models.CharField(max_length=50)
+
+
 class User(models.Model):
     name = models.CharField(max_length=50)
 
