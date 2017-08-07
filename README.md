@@ -69,7 +69,7 @@ class RoomBooking(models.Model):
 
 With `unique=False`, partial indexes can be used to optimise lookups that return only a small subset of the rows.
 
-For example, you might have a job queue table which keeps an archive of millions of completed rows. Among these are a few pending jobs,
+For example, you might have a job queue table which keeps an archive of millions of completed jobs. Among these are a few pending jobs,
 which you want to find with a `.filter(is_complete=0)` query.
 
 ```python
@@ -85,7 +85,7 @@ class Job(models.Model):
         ]
 ```
 
-Compared to an usual full index on the `is_complete` field, this can be significantly smaller on disk and memory, and faster to update.
+Compared to an usual full index on the `is_complete` field, this can be significantly smaller in disk and memory use, and faster to update.
 
 ### Different where-expressions for PostgreSQL and SQLite
 
@@ -100,17 +100,21 @@ from partial_index import PartialIndex
 
 class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    is_complete = models.BooleanField(default=0)
+    is_complete = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['created_at'], unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0')
+            PartialIndex(fields=['created_at'], unique=False,
+                         where_postgresql='is_complete = false',
+                         where_sqlite='is_complete = 0')
         ]
 ```
 
 If the expressions for both backends are the same, you must use the single `where=''` argument for consistency.
 
-It is up to you to ensure that the expressions are otherwise valid SQL and have the same behaviour. Using [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that check the syntax and generate valid SQL
+It is up to you to ensure that the expressions are otherwise valid SQL and have the same behaviour.
+
+Using [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that check the syntax and generate valid SQL
 for either database is planned for a future version.
 
 
