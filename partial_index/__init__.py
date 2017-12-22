@@ -47,7 +47,7 @@ class PartialIndex(Index):
         self.where = where
         self.where_postgresql = where_postgresql
         self.where_sqlite = where_sqlite
-        super(PartialIndex, self).__init__(fields, name)
+        super(PartialIndex, self).__init__(fields=fields, name=name)
 
     def __repr__(self):
         if self.where:
