@@ -17,8 +17,8 @@ class Room(models.Model):
 
 
 class RoomBooking(models.Model):
-    user = models.ForeignKey(User)
-    room = models.ForeignKey(Room)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
