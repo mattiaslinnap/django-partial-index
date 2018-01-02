@@ -1,4 +1,0 @@
-# Dependencies for tests.
-
-Django>=1.11
-psycopg2

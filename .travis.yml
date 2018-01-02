@@ -1,8 +1,15 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-install: "pip install -r requirements.txt"
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+env:
+  - DJANGO_VERSION=1.11.9
+  - DJANGO_VERSION=2.0.1
+matrix:
+  exclude:
+  - python: 2.7
+    env: DJANGO_VERSION=2.0.1
+install: "pip install -q psycopg2 django==$DJANGO_VERSION"
 script: ./tests/runtests.py
