@@ -1,6 +1,6 @@
 # Provide a nicer error message than failing to import models.Index.
 
-VERSION = (0, 3, 0)
+VERSION = (0, 4, 0)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
@@ -77,7 +77,27 @@ class PartialIndex(Index):
         return vendor
 
     def get_sql_create_template_values(self, model, schema_editor, using):
-        parameters = super(PartialIndex, self).get_sql_create_template_values(model, schema_editor, using)
+        # This method exists on Django 1.11 Index class, but has been moved to the SchemaEditor on Django 2.0.
+        # This makes it complex to call superclass methods and avoid duplicating code.
+        # Can be simplified if Django 1.11 support is dropped one day.
+
+        # Copied from Django 1.11 Index.get_sql_create_template_values(), which does not exist in Django 2.0:
+        fields = [model._meta.get_field(field_name) for field_name, order in self.fields_orders]
+        tablespace_sql = schema_editor._get_index_tablespace_sql(model, fields)
+        quote_name = schema_editor.quote_name
+        columns = [
+            ('%s %s' % (quote_name(field.column), order)).strip()
+            for field, (field_name, order) in zip(fields, self.fields_orders)
+        ]
+        parameters = {
+            'table': quote_name(model._meta.db_table),
+            'name': quote_name(self.name),
+            'columns': ', '.join(columns),
+            'using': using,
+            'extra': tablespace_sql,
+        }
+
+        # PartialIndex updates:
         parameters['unique'] = ' UNIQUE' if self.unique else ''
         # Note: the WHERE predicate is not yet checked for syntax or field names, and is inserted into the CREATE INDEX query unescaped.
         # This is bad for usability, but is not a security risk, as the string cannot come from user input.
@@ -92,7 +112,6 @@ class PartialIndex(Index):
 
     def create_sql(self, model, schema_editor, using=''):
         vendor = self.get_valid_vendor(schema_editor)
-        # Only change from super function - override query template to insert optional UNIQUE at start, and WHERE at the end.
         sql_template = self.sql_create_index[vendor]
         sql_parameters = self.get_sql_create_template_values(model, schema_editor, using)
         return sql_template % sql_parameters
