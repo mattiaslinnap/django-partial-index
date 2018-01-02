@@ -6,13 +6,13 @@ from setuptools import setup
 setup(
     name='django-partial-index',
     packages=['partial_index'],
-    version='0.3.0',
+    version='0.4.0',
     description='PostgreSQL and SQLite partial indexes for Django models',
     long_description=open('README.md').read(),
     author='Mattias Linnap',
     author_email='mattias@linnap.com',
     url='https://github.com/mattiaslinnap/django-partial-index',
-    download_url='https://github.com/mattiaslinnap/django-partial-index/archive/0.3.0.tar.gz',
+    download_url='https://github.com/mattiaslinnap/django-partial-index/archive/0.4.0.tar.gz',
     license='BSD',
     install_requires=[],
     classifiers=[
@@ -20,6 +20,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
