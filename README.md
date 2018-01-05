@@ -20,10 +20,9 @@ More info on partial indexes:
 
 Requirements:
 
-* Django 1.11 or later.
+* Django 1.11 (with Python 2.7 and 3.4 - 3.6), or
+* Django 2.0 (with Python 3.4 - 3.6).
 * PostgreSQL or SQLite database backend. (Partial indexes are not supported on MySQL, and require major hackery on Oracle.)
-* Python 2.7 and 3.4 - 3.6 for Django 1.11.
-* Python 3.4 - 3.6 for Django 2.0.
 
 ## Usage
 

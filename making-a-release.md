@@ -9,7 +9,6 @@
 1. Push to release branch on github, review that tests pass on Travis.
 1. `python3 setup.py sdist bdist_wheel upload`
 1. Go to https://github.com/mattiaslinnap/django-partial-index/releases and click New Release, fill details:
-  1. New tag name should be just the numeric version ("1.2.3" not "v1.2.3")
-  1. From branch "release"
-  1. Release title should be "v1.2.3"
-  1.
+   1. New tag name should be just the numeric version ("1.2.3" not "v1.2.3")
+   1. From branch "release"
+   1. Release title should be "v1.2.3"
