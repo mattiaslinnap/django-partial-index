@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
-from testapp.models import User, Room, RoomBooking, Job
+from testapp.models import User, Room, RoomBooking, Job, Comparison
 
 
 class PartialIndexRoomBookingTest(TestCase):
@@ -65,3 +65,22 @@ class PartialIndexJobTest(TestCase):
         job1 = Job.objects.create(order=1, group=1)
         job2 = Job.objects.create(order=1, group=1, is_complete=True)
         self.assertEqual(job1.order, job2.order)
+
+
+class PartialIndexComparisonTest(TestCase):
+    """Test that partial unique constraints work as expected when inserting data to the db.
+
+    Models and indexes are created when django creates the test db, they do not need to be set up.
+    """
+    def test_comp_duplicate_same_number(self):
+        Comparison.objects.create(a=1, b=1)
+        with self.assertRaises(IntegrityError):
+            Comparison.objects.create(a=1, b=1)
+
+    def test_comp_different_same_number(self):
+        Comparison.objects.create(a=1, b=1)
+        Comparison.objects.create(a=2, b=2)
+
+    def test_comp_duplicate_different_numbers(self):
+        Comparison.objects.create(a=1, b=2)
+        Comparison.objects.create(a=1, b=2)

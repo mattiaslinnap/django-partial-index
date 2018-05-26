@@ -35,3 +35,14 @@ class Job(models.Model):
             PartialIndex(fields=['-order'], unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0'),
             PartialIndex(fields=['group'], unique=True, where_postgresql='is_complete = false', where_sqlite='is_complete = 0'),
         ]
+
+
+class Comparison(models.Model):
+    """Partial index that references multiple fields on the model."""
+    a = models.IntegerField()
+    b = models.IntegerField()
+
+    class Meta:
+        indexes = [
+            PartialIndex(fields=['a', 'b'], unique=True, where='a = b'),
+        ]
