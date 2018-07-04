@@ -1,10 +1,10 @@
 # Provide a nicer error message than failing to import models.Index.
 
-VERSION = (0, 4, 0)
+VERSION = (0, 5, 0)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
-__all__ = ['PartialIndex']
+__all__ = ['PartialIndex', 'ValidatePartialUniqueMixin', 'PartialUniqueValidationError']
 
 
 MIN_DJANGO_VERSION = (1, 11)
@@ -20,3 +20,4 @@ if tuple(django.VERSION[:2]) < MIN_DJANGO_VERSION:
 
 
 from .index import PartialIndex
+from .mixins import ValidatePartialUniqueMixin, PartialUniqueValidationError

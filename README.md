@@ -121,6 +121,11 @@ for either database is planned for a future version.
 
 ## Version History
 
+### 0.5.0 (latest)
+* Add support for Q-object based where-expressions.
+* Deprecate support for text-based where-expressions. These will be removed in version 0.6.
+* Add ValidatePartialUniqueMixin for model classes. This adds partial unique index validation for ModelForms and DRF Serializers, avoiding an IntegrityError and instead showing an error message as with usual unique_together constraints.
+
 ### 0.4.0 (latest)
 * Add support for Django 2.0.
 

@@ -1,7 +1,10 @@
+"""Models for tests."""
+
 from django.db import models
 from django.db.models import Q, F
 
-from partial_index import PartialIndex
+
+from partial_index import PartialIndex, ValidatePartialUniqueMixin
 
 
 class AB(models.Model):
@@ -9,15 +12,31 @@ class AB(models.Model):
     b = models.CharField(max_length=50)
 
 
+class ABC(models.Model):
+    a = models.CharField(max_length=50)
+    b = models.CharField(max_length=50)
+    c = models.CharField(max_length=50)
+
+
 class User(models.Model):
     name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 class Room(models.Model):
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.name
 
-class RoomBookingText(models.Model):
+
+class RoomBookingText(ValidatePartialUniqueMixin, models.Model):
+    """Note that ValidatePartialUniqueMixin cannot actually be used on this model, as it uses text-based index conditions.
+
+    Any ModelForm or DRF Serializer validation will fail.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -26,7 +45,7 @@ class RoomBookingText(models.Model):
         indexes = [PartialIndex(fields=['user', 'room'], unique=True, where='deleted_at IS NULL')]
 
 
-class RoomBookingQ(models.Model):
+class RoomBookingQ(ValidatePartialUniqueMixin, models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     deleted_at = models.DateTimeField(null=True, blank=True)

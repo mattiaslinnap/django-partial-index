@@ -122,7 +122,7 @@ class PartialIndexSqlTest(TestCase):
         self.assertContainsMatch(editor.collected_sql, COMPARISON_Q_SQL)
 
 
-class PartialIndexTextCreateTest(TestCase):
+class PartialIndexCreateTest(TestCase):
     """Check that the index really can be added to and removed from the model in the DB."""
 
     def schema_editor(self):

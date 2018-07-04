@@ -35,7 +35,11 @@ def main(args):
 
     from django.test.runner import DiscoverRunner
     test_runner = DiscoverRunner(top_level=TESTS_DIR, interactive=False, keepdb=False)
-    failures = test_runner.run_tests(['tests'])
+    if args.testpaths:
+        paths = ['tests.' + p for p in args.testpaths]
+        failures = test_runner.run_tests(paths)
+    else:
+        failures = test_runner.run_tests(['tests'])
     if failures:
         sys.exit(1)
 
@@ -43,5 +47,6 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--db', required=True)
+    parser.add_argument('testpaths', nargs='*')
     args = parser.parse_args()
     main(args)
