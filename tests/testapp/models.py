@@ -1,7 +1,7 @@
 """Models for tests."""
 
 from django.db import models
-from django.db.models import Q, F
+from django.db.models import F
 
 
 from partial_index import PartialIndex, PQ, ValidatePartialUniqueMixin

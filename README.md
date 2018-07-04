@@ -14,6 +14,9 @@ More info on partial indexes:
 * https://sqlite.org/partialindex.html
 
 
+## Table of Contents
+
+
 ## Install
 
 `pip install django-partial-index`
@@ -29,15 +32,17 @@ Requirements:
 Set up a PartialIndex and insert it into your model's class-based Meta.indexes list:
 
 ```python
-from partial_index import PartialIndex
+from partial_index import PartialIndex, PQ
 
 class MyModel(models.Model):
     class Meta:
         indexes = [
-            PartialIndex(fields=['user', 'room'], unique=True, where='deleted_at IS NULL'),
-            PartialIndex(fields=['created_at'], unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0'),
+            PartialIndex(fields=['user', 'room'], unique=True, where=PQ(deleted_at__isnull=True)),
+            PartialIndex(fields=['created_at'], unique=False, where=PQ(is_complete=False)),
         ]
 ```
+
+The `PQ` uses the exact same syntax and supports all the same features as Django's `Q` objects (see here for a full tutorial).
 
 Of course, these (unique) indexes could be created by a handwritten [RunSQL migration](https://docs.djangoproject.com/en/1.11/ref/migration-operations/#runsql).
 But the constraints are part of the business logic, and best kept close to the model definitions.
@@ -52,7 +57,7 @@ You wish to add unique constraints on "alive" rows, but allow multiple copies in
 distinguish between the archived and alive rows.
 
 ```python
-from partial_index import PartialIndex
+from partial_index import PartialIndex, PQ
 
 class RoomBooking(models.Model):
     user = models.ForeignKey(User)
@@ -62,7 +67,7 @@ class RoomBooking(models.Model):
     class Meta:
         # unique_together = [('user', 'room')] - Does not allow multiple deleted rows. Instead use:
         indexes = [
-            PartialIndex(fields=['user', 'room'], unique=True, where='deleted_at IS NULL')
+            PartialIndex(fields=['user', 'room'], unique=True, where=PQ(deleted_at__isnull=True))
         ]
 ```
 
@@ -74,7 +79,7 @@ For example, you might have a job queue table which keeps an archive of millions
 which you want to find with a `.filter(is_complete=0)` query.
 
 ```python
-from partial_index import PartialIndex
+from partial_index import PartialIndex, PQ
 
 class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -82,42 +87,53 @@ class Job(models.Model):
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['created_at'], unique=False, where='is_complete = 0')
+            PartialIndex(fields=['created_at'], unique=False, where=PQ(is_complete=0))
         ]
 ```
 
 Compared to an usual full index on the `is_complete` field, this can be significantly smaller in disk and memory use, and faster to update.
 
-### Different where-expressions for PostgreSQL and SQLite
+### Referencing multiple fields in the condition
 
-Note that the where-expression is directly inserted into the `CREATE INDEX` sql statement, and must be valid for your database backend.
-
-In rare cases, PostgreSQL and SQLite differ in the syntax that they expect. One such case is boolean literals:
-SQLite only accepts numbers 0/1, and PostgreSQL only accepts unquoted false/true and a few quoted strings (but not numbers). You can provide
-a separate where expression if you wish to support both backends in your project:
+With Django's `F`-expressions, you can create conditions that reference multiple fields:
 
 ```python
-from partial_index import PartialIndex
+from django.db.models import F
+from partial_index import PartialIndex, PQ
 
-class Job(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_complete = models.BooleanField(default=False)
+class NotTheSameAgain(models.Model):
+    a = models.IntegerField()
+    b = models.IntegerField()
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['created_at'], unique=False,
-                         where_postgresql='is_complete = false',
-                         where_sqlite='is_complete = 0')
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=F('b'))),
         ]
 ```
 
-If the expressions for both backends are the same, you must use the single `where=''` argument for consistency.
+This PartialIndex allows multiple copies of `(2, 3)`, but only a single copy of `(2, 2)` to exist in the database.
 
-It is up to you to ensure that the expressions are otherwise valid SQL and have the same behaviour.
+### Unique validation on ModelForms and DRF ModelSerializers
 
-Using [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that check the syntax and generate valid SQL
-for either database is planned for a future version.
+Unique partial indexes are validated by the PostgreSQL and SQLite databases. When they reject an INSERT or UPDATE, Django raises a `IntegrityError` exception. This results in a `500 Server Error` status page in the browser if not handled before the database query is run.
 
+ModelForms and DRF ModelSerializers perform unique validation before saving an object, and present the user with a descriptive error message.
+
+PartialIndex does not modify the parent model's unique validation, so partial index validations are not handled by them by default. To add that to your model, include the `ValidatePartialUniqueMixin` in your model definition:
+
+```python
+from partial_index import PartialIndex, PQ, ValidatePartialUniqueMixin
+
+class MyModel(ValidatePartialUniqueMixin, models.Model):
+    class Meta:
+        indexes = [
+            PartialIndex(fields=['user', 'room'], unique=True, where=PQ(deleted_at__isnull=True)),
+        ]
+```
+
+Note that it should be added on the model itself, not the ModelForm or ModelSerializer class.
+
+Adding the mixin for non-unique partial indexes is unnecessary, as they cannot cause database IntegrityErrors.
 
 ## Version History
 
