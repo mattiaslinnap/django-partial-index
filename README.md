@@ -135,11 +135,30 @@ Note that it should be added on the model itself, not the ModelForm or ModelSeri
 
 Adding the mixin for non-unique partial indexes is unnecessary, as they cannot cause database IntegrityErrors.
 
+### Text-based where-conditions (deprecated)
+
+Text-based where-conditions are deprecated and will be removed in the next release (0.6.0) of django-partial-index.
+
+They are still supported in version 0.5.0 to simplify upgrading existing projects to the `PQ`-based indexes. New projects should not use them.
+
+
+```python
+from partial_index import PartialIndex
+
+class TextExample(models.Model):
+    class Meta:
+        indexes = [
+            PartialIndex(fields=['user', 'room'], unique=True, where='deleted_at IS NULL'),
+            PartialIndex(fields=['created_at'], unique=False, where_postgresql='is_complete = false', where_sqlite='is_complete = 0')
+        ]
+```
+
+
 ## Version History
 
 ### 0.5.0 (latest)
 * Add support for Q-object based where-expressions.
-* Deprecate support for text-based where-expressions. These will be removed in version 0.6.
+* Deprecate support for text-based where-expressions. These will be removed in version 0.6.0.
 * Add ValidatePartialUniqueMixin for model classes. This adds partial unique index validation for ModelForms and DRF Serializers, avoiding an IntegrityError and instead showing an error message as with usual unique_together constraints.
 
 ### 0.4.0 (latest)
