@@ -4,7 +4,7 @@ VERSION = (0, 5, 0)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
-__all__ = ['PartialIndex', 'ValidatePartialUniqueMixin', 'PartialUniqueValidationError']
+__all__ = ['PartialIndex', 'PQ', 'ValidatePartialUniqueMixin', 'PartialUniqueValidationError']
 
 
 MIN_DJANGO_VERSION = (1, 11)
@@ -20,4 +20,5 @@ if tuple(django.VERSION[:2]) < MIN_DJANGO_VERSION:
 
 
 from .index import PartialIndex
+from .query import PQ
 from .mixins import ValidatePartialUniqueMixin, PartialUniqueValidationError

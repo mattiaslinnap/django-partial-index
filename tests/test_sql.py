@@ -2,11 +2,10 @@
 Tests for SQL CREATE INDEX statements.
 """
 from django.db import connection
-from django.db.models import Q
 from django.test import TestCase
 import re
 
-from partial_index import PartialIndex
+from partial_index import PartialIndex, PQ
 from testapp.models import RoomBookingText, JobText, ComparisonText, RoomBookingQ, JobQ, ComparisonQ
 
 
@@ -178,7 +177,7 @@ class PartialIndexCreateTest(TestCase):
 
     def test_unique_q(self):
         index_name = 'roombookingq_test_idx'
-        index = PartialIndex(fields=['user', 'room'], name=index_name, unique=True, where=Q(deleted_at__isnull=True))
+        index = PartialIndex(fields=['user', 'room'], name=index_name, unique=True, where=PQ(deleted_at__isnull=True))
         self.assertAddRemoveConstraint(RoomBookingQ, index_name, index, {
             'columns': ['user_id', 'room_id'],
             'primary_key': False,
@@ -189,7 +188,7 @@ class PartialIndexCreateTest(TestCase):
 
     def test_not_unique_q(self):
         index_name = 'jobq_test_idx'
-        index = PartialIndex(fields=['-group'], name=index_name, unique=False, where=Q(is_complete=False))
+        index = PartialIndex(fields=['-group'], name=index_name, unique=False, where=PQ(is_complete=False))
         self.assertAddRemoveConstraint(JobQ, index_name, index, {
             'columns': ['group'],
             'orders': ['DESC'],

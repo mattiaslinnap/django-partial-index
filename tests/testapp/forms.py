@@ -5,7 +5,7 @@ from testapp.models import RoomBookingQ, RoomBookingText
 
 
 class RoomBookingTextForm(forms.ModelForm):
-    """All fields are present on the form."""
+    """Always fails with ImproperlyConfigured error, because mixin cannot be used with text-based conditions."""
     class Meta:
         model = RoomBookingText
         fields = ('user', 'room', 'deleted_at')

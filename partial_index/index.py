@@ -12,12 +12,12 @@ def validate_where(where='', where_postgresql='', where_sqlite=''):
         if isinstance(where, six.string_types):
             warnings.warn(
                 'Text-based where predicates are deprecated, will be removed in a future release. ' +
-                'Please upgrade to where=Q().',
+                'Please upgrade to where=PQ().',
                 DeprecationWarning)
-        elif isinstance(where, Q):
+        elif isinstance(where, query.PQ):
             pass
         else:
-            raise ValueError('Where predicate must be a string or Django Q object.')
+            raise ValueError('Where predicate must be a string or a partial_index.PQ object.')
     else:
         if not where_postgresql and not where_sqlite:
             raise ValueError('A where predicate must be provided.')
@@ -28,7 +28,7 @@ def validate_where(where='', where_postgresql='', where_sqlite=''):
             raise ValueError('where_postgresql and where_sqlite must be strings.')
         warnings.warn(
             'Text-based where predicates are deprecated, will be removed in a future release. ' +
-            'Please upgrade to where=Q().',
+            'Please upgrade to where=PQ().',
             DeprecationWarning)
     return where, where_postgresql, where_sqlite
 
@@ -55,7 +55,7 @@ class PartialIndex(Index):
 
     def __repr__(self):
         if self.where:
-            if isinstance(self.where, Q):
+            if isinstance(self.where, query.PQ):
                 anywhere = "where=%s" % repr(self.where)
             else:
                 anywhere = "where='%s'" % self.where
@@ -105,7 +105,7 @@ class PartialIndex(Index):
         # Note: the WHERE predicate is not yet checked for syntax or field names, and is inserted into the CREATE INDEX query unescaped.
         # This is bad for usability, but is not a security risk, as the string cannot come from user input.
         vendor = query.get_valid_vendor(schema_editor)
-        if isinstance(self.where, Q):
+        if isinstance(self.where, query.PQ):
             parameters['where'] = query.q_to_sql(self.where, model, schema_editor)
         elif vendor == 'postgresql':
             parameters['where'] = self.where_postgresql or self.where

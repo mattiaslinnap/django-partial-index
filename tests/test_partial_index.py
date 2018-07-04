@@ -3,12 +3,10 @@ Tests for basic fields and functions in the PartialIndex class.
 
 Tests interacting with a real PostgreSQL database are elsewhere.
 """
-import pprint
 
-from django.db.models import Q
 from django.test import SimpleTestCase
 
-from partial_index import PartialIndex
+from partial_index import PartialIndex, PQ
 from testapp.models import AB
 
 
@@ -48,8 +46,8 @@ class PartialIndexTextBasedWhereRulesTest(SimpleTestCase):
             PartialIndex(fields=['a', 'b'], unique=True, where_postgresql='a IS NULL', where_sqlite='a IS NULL')
 
 
-class PartialIndexQBasedWhereRulesTest(SimpleTestCase):
-    """Test the rules for providing Q-based where arguments."""
+class PartialIndexPQBasedWhereRulesTest(SimpleTestCase):
+    """Test the rules for providing PQ-based where arguments."""
 
     def test_where_not_provided(self):
         # Same as text based test - keep a copy here for the future when text-based are removed entirely.
@@ -58,15 +56,15 @@ class PartialIndexQBasedWhereRulesTest(SimpleTestCase):
 
     def test_single_q_and_pg(self):
         with self.assertRaisesRegexp(ValueError, 'must not provide'):
-            PartialIndex(fields=['a', 'b'], unique=True, where=Q(a__isnull=True), where_postgresql='a IS NULL')
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a__isnull=True), where_postgresql='a IS NULL')
 
     def test_single_q_and_sqlite(self):
         with self.assertRaisesRegexp(ValueError, 'must not provide'):
-            PartialIndex(fields=['a', 'b'], unique=True, where=Q(a__isnull=True), where_sqlite='a IS NULL')
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a__isnull=True), where_sqlite='a IS NULL')
 
     def test_single_q_and_pg_and_sqlite(self):
         with self.assertRaisesRegexp(ValueError, 'must not provide'):
-            PartialIndex(fields=['a', 'b'], unique=True, where=Q(a__isnull=True), where_postgresql='a IS NULL', where_sqlite='a IS NULL')
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a__isnull=True), where_postgresql='a IS NULL', where_sqlite='a IS NULL')
 
 
 class PartialIndexSingleTextWhereTest(SimpleTestCase):
@@ -189,24 +187,24 @@ class PartialIndexMultiTextWhereTest(SimpleTestCase):
         self.assertNotEqual(idx1.name, idx2.name)
 
 
-class PartialIndexSingleQWhereTest(SimpleTestCase):
+class PartialIndexSinglePQWhereTest(SimpleTestCase):
     """Test simple fields and methods on the PartialIndex class with a Q-based where predicate."""
 
     def setUp(self):
-        self.idx = PartialIndex(fields=['a', 'b'], unique=True, where=Q(a__isnull=True))
+        self.idx = PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a__isnull=True))
 
     def test_no_unique(self):
         with self.assertRaisesMessage(ValueError, 'Unique must be True or False'):
-            PartialIndex(fields=['a', 'b'], where=Q(a__isnull=True))
+            PartialIndex(fields=['a', 'b'], where=PQ(a__isnull=True))
 
     def test_fields(self):
         self.assertEqual(self.idx.unique, True)
-        self.assertEqual(self.idx.where, Q(a__isnull=True))
+        self.assertEqual(self.idx.where, PQ(a__isnull=True))
         self.assertEqual(self.idx.where_postgresql, '')
         self.assertEqual(self.idx.where_sqlite, '')
 
     def test_repr(self):
-        self.assertEqual(repr(self.idx), "<PartialIndex: fields='a, b', unique=True, where=<Q: (AND: ('a__isnull', True))>>")
+        self.assertEqual(repr(self.idx), "<PartialIndex: fields='a, b', unique=True, where=<PQ: (AND: ('a__isnull', True))>>")
 
     def test_deconstruct(self):
         path, args, kwargs = self.idx.deconstruct()
@@ -214,7 +212,7 @@ class PartialIndexSingleQWhereTest(SimpleTestCase):
         self.assertEqual((), args)
         self.assertEqual(kwargs['fields'], ['a', 'b'])
         self.assertEqual(kwargs['unique'], True)
-        self.assertEqual(kwargs['where'], Q(a__isnull=True))
+        self.assertEqual(kwargs['where'], PQ(a__isnull=True))
         self.assertEqual(kwargs['where_postgresql'], '')
         self.assertEqual(kwargs['where_sqlite'], '')
         self.assertIn('name', kwargs)  # Exact value of name is not tested.
@@ -223,41 +221,41 @@ class PartialIndexSingleQWhereTest(SimpleTestCase):
         self.assertEqual(self.idx.suffix, 'partial')
 
     def test_generated_name_ends_with_partial(self):
-        idx = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx.set_name_with_model(AB)
         self.assertEqual(idx.name[-8:], '_partial')
 
     def test_same_args_same_name(self):
-        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx1.set_name_with_model(AB)
-        idx2 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx2 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx2.set_name_with_model(AB)
         self.assertEqual(idx1.name, idx2.name)
 
     def test_field_sort_changes_generated_name(self):
-        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx1.set_name_with_model(AB)
-        idx2 = PartialIndex(fields=['a', '-b'], unique=False, where=Q(a__isnull=True))
+        idx2 = PartialIndex(fields=['a', '-b'], unique=False, where=PQ(a__isnull=True))
         idx2.set_name_with_model(AB)
         self.assertNotEqual(idx1.name, idx2.name)
 
     def test_field_order_changes_generated_name(self):
-        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx1.set_name_with_model(AB)
-        idx2 = PartialIndex(fields=['b', 'a'], unique=False, where=Q(a__isnull=True))
+        idx2 = PartialIndex(fields=['b', 'a'], unique=False, where=PQ(a__isnull=True))
         idx2.set_name_with_model(AB)
         self.assertNotEqual(idx1.name, idx2.name)
 
     def test_unique_changes_generated_name(self):
-        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx1.set_name_with_model(AB)
-        idx2 = PartialIndex(fields=['a', 'b'], unique=True, where=Q(a__isnull=True))
+        idx2 = PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a__isnull=True))
         idx2.set_name_with_model(AB)
         self.assertNotEqual(idx1.name, idx2.name)
 
     def test_where_changes_generated_name(self):
-        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=True))
+        idx1 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=True))
         idx1.set_name_with_model(AB)
-        idx2 = PartialIndex(fields=['a', 'b'], unique=False, where=Q(a__isnull=False))
+        idx2 = PartialIndex(fields=['a', 'b'], unique=False, where=PQ(a__isnull=False))
         idx2.set_name_with_model(AB)
         self.assertNotEqual(idx1.name, idx2.name)

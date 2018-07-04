@@ -35,7 +35,7 @@ class ValidatePartialUniqueMixin(object):
 
     def validate_unique(self, exclude=None):
         # Standard unique validation first.
-        super().validate_unique(exclude=exclude)
+        super(ValidatePartialUniqueMixin, self).validate_unique(exclude=exclude)
         self.validate_partial_unique()
 
     def validate_partial_unique(self):

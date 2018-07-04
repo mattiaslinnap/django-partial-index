@@ -1,12 +1,28 @@
 """Django Q object to SQL string conversion."""
-
-from django.db.models import expressions
+import django
+from django.db.models import expressions, Q
 from django.db.models.sql import Query
 
 
 class Vendor(object):
     POSTGRESQL = 'postgresql'
     SQLITE = 'sqlite'
+
+
+class PQ(Q):
+    """Compatibility class for Q-objects.
+
+    Django 2.0 Q-objects are suitable on their own, but Django 1.11 needs a better deep equality comparison.
+
+    PartialIndex definitions in model classes should use PQ to avoid problems when upgrading projects.
+    """
+    if tuple(django.VERSION[:2]) < (2, 0):
+        def __eq__(self, other):
+            if self.__class__ != other.__class__:
+                return False
+            if (self.connector, self.negated) == (other.connector, other.negated):
+                return self.children == other.children
+            return False
 
 
 def get_valid_vendor(schema_editor):

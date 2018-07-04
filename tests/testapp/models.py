@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Q, F
 
 
-from partial_index import PartialIndex, ValidatePartialUniqueMixin
+from partial_index import PartialIndex, PQ, ValidatePartialUniqueMixin
 
 
 class AB(models.Model):
@@ -51,7 +51,7 @@ class RoomBookingQ(ValidatePartialUniqueMixin, models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        indexes = [PartialIndex(fields=['user', 'room'], unique=True, where=Q(deleted_at__isnull=True))]
+        indexes = [PartialIndex(fields=['user', 'room'], unique=True, where=PQ(deleted_at__isnull=True))]
 
 
 class JobText(models.Model):
@@ -73,8 +73,8 @@ class JobQ(models.Model):
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['-order'], unique=False, where=Q(is_complete=False)),
-            PartialIndex(fields=['group'], unique=True, where=Q(is_complete=False)),
+            PartialIndex(fields=['-order'], unique=False, where=PQ(is_complete=False)),
+            PartialIndex(fields=['group'], unique=True, where=PQ(is_complete=False)),
         ]
 
 
@@ -96,5 +96,5 @@ class ComparisonQ(models.Model):
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['a', 'b'], unique=True, where=Q(a=F('b'))),
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=F('b'))),
         ]
