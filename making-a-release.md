@@ -4,7 +4,6 @@
 1. Update version number in `setup.py`
 1. Update download link version number in `setup.py`
 1. If added or removed support for some Python/Django versions, update classifiers in `setup.py`
-1. Update PyPI version badge number in `README.md`
 1. Update version history at the end of `README.md`
 1. Push to release branch on github, review that tests pass on Travis.
 1. `python3 setup.py sdist bdist_wheel upload`

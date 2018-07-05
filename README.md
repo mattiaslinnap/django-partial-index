@@ -156,7 +156,10 @@ class TextExample(models.Model):
 
 ## Version History
 
-### 0.5.0 (latest)
+### 0.5.1 (latest)
+* Fix README formatting in PyPI.
+
+### 0.5.0
 * Add support for Q-object based where-expressions.
 * Deprecate support for text-based where-expressions. These will be removed in version 0.6.0.
 * Add ValidatePartialUniqueMixin for model classes. This adds partial unique index validation for ModelForms, avoiding an IntegrityError and instead showing an error message as with usual unique_together constraints.
