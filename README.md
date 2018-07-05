@@ -1,7 +1,7 @@
 # django-partial-index
 
 [![Build Status](https://api.travis-ci.org/mattiaslinnap/django-partial-index.svg?branch=master)](https://travis-ci.org/mattiaslinnap/django-partial-index)
-[![PyPI version](https://badge.fury.io/py/django-partial-index.svg)](https://pypi.python.org/pypi/django-partial-index/0.5.0)
+[![PyPI version](https://badge.fury.io/py/django-partial-index.svg)](https://pypi.python.org/pypi/django-partial-index/)
 
 Partial (sometimes also called filtered or conditional) index support for Django.
 
