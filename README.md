@@ -184,5 +184,5 @@ class TextExample(models.Model):
 
 ## Future plans
 
-* Replace `where='some sql expression'` with [Django's query expressions](https://docs.djangoproject.com/en/1.11/ref/models/expressions/) that are checked for valid syntax and field names.
+* Remove support for text-based where conditions.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
