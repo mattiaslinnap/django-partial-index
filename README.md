@@ -42,7 +42,7 @@ class MyModel(models.Model):
         ]
 ```
 
-The `PQ` uses the exact same syntax and supports all the same features as Django's `Q` objects (see here for a full tutorial).
+The `PQ` uses the exact same syntax and supports all the same features as Django's `Q` objects ([see Django docs for a full tutorial](https://docs.djangoproject.com/en/1.11/topics/db/queries/#complex-lookups-with-q-objects)).
 
 Of course, these (unique) indexes could be created by a handwritten [RunSQL migration](https://docs.djangoproject.com/en/1.11/ref/migration-operations/#runsql).
 But the constraints are part of the business logic, and best kept close to the model definitions.
@@ -113,13 +113,13 @@ class NotTheSameAgain(models.Model):
 
 This PartialIndex allows multiple copies of `(2, 3)`, but only a single copy of `(2, 2)` to exist in the database.
 
-### Unique validation on ModelForms and DRF ModelSerializers
+### Unique validation on ModelForms
 
 Unique partial indexes are validated by the PostgreSQL and SQLite databases. When they reject an INSERT or UPDATE, Django raises a `IntegrityError` exception. This results in a `500 Server Error` status page in the browser if not handled before the database query is run.
 
-ModelForms and DRF ModelSerializers perform unique validation before saving an object, and present the user with a descriptive error message.
+ModelForms perform unique validation before saving an object, and present the user with a descriptive error message.
 
-PartialIndex does not modify the parent model's unique validation, so partial index validations are not handled by them by default. To add that to your model, include the `ValidatePartialUniqueMixin` in your model definition:
+Adding an index does not modify the parent model's unique validation, so partial index validations are not handled by them by default. To add that to your model, include the `ValidatePartialUniqueMixin` in your model definition:
 
 ```python
 from partial_index import PartialIndex, PQ, ValidatePartialUniqueMixin
@@ -131,7 +131,7 @@ class MyModel(ValidatePartialUniqueMixin, models.Model):
         ]
 ```
 
-Note that it should be added on the model itself, not the ModelForm or ModelSerializer class.
+Note that it should be added on the model itself, not the ModelForm class.
 
 Adding the mixin for non-unique partial indexes is unnecessary, as they cannot cause database IntegrityErrors.
 
@@ -159,9 +159,9 @@ class TextExample(models.Model):
 ### 0.5.0 (latest)
 * Add support for Q-object based where-expressions.
 * Deprecate support for text-based where-expressions. These will be removed in version 0.6.0.
-* Add ValidatePartialUniqueMixin for model classes. This adds partial unique index validation for ModelForms and DRF Serializers, avoiding an IntegrityError and instead showing an error message as with usual unique_together constraints.
+* Add ValidatePartialUniqueMixin for model classes. This adds partial unique index validation for ModelForms, avoiding an IntegrityError and instead showing an error message as with usual unique_together constraints.
 
-### 0.4.0 (latest)
+### 0.4.0
 * Add support for Django 2.0.
 
 ### 0.3.0
@@ -184,5 +184,6 @@ class TextExample(models.Model):
 
 ## Future plans
 
+* Add a validation mixin for DRF Serializers.
 * Remove support for text-based where conditions.
 * Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
