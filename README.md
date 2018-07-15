@@ -42,7 +42,7 @@ class MyModel(models.Model):
         ]
 ```
 
-The `PQ` uses the exact same syntax and supports all the same features as Django's `Q` objects ([see Django docs for a full tutorial](https://docs.djangoproject.com/en/1.11/topics/db/queries/#complex-lookups-with-q-objects)).
+The `PQ` uses the exact same syntax and supports all the same features as Django's `Q` objects ([see Django docs for a full tutorial](https://docs.djangoproject.com/en/1.11/topics/db/queries/#complex-lookups-with-q-objects)). It is provided for compatibility with Django 1.11.
 
 Of course, these (unique) indexes could be created by a handwritten [RunSQL migration](https://docs.djangoproject.com/en/1.11/ref/migration-operations/#runsql).
 But the constraints are part of the business logic, and best kept close to the model definitions.
@@ -95,11 +95,10 @@ Compared to an usual full index on the `is_complete` field, this can be signific
 
 ### Referencing multiple fields in the condition
 
-With Django's `F`-expressions, you can create conditions that reference multiple fields:
+With `F`-expressions, you can create conditions that reference multiple fields:
 
 ```python
-from django.db.models import F
-from partial_index import PartialIndex, PQ
+from partial_index import PartialIndex, PQ, PF
 
 class NotTheSameAgain(models.Model):
     a = models.IntegerField()
@@ -107,11 +106,13 @@ class NotTheSameAgain(models.Model):
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=F('b'))),
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=PF('b'))),
         ]
 ```
 
 This PartialIndex allows multiple copies of `(2, 3)`, but only a single copy of `(2, 2)` to exist in the database.
+
+The `PF` uses the exact same syntax and supports all the same features as Django's `F` expressions ([see Django docs for a full tutorial](https://docs.djangoproject.com/en/1.11/ref/models/expressions/#f-expressions)). It is provided for compatibility with Django 1.11.
 
 ### Unique validation on ModelForms
 
@@ -156,7 +157,11 @@ class TextExample(models.Model):
 
 ## Version History
 
-### 0.5.1 (latest)
+### 0.5.2 (latest)
+* Fix makemigrations for Django 1.11.
+* Make sure PQ and PF are imported directly from partial_index in migration files.
+
+### 0.5.1
 * Fix README formatting in PyPI.
 
 ### 0.5.0
