@@ -1,10 +1,9 @@
 """Models for tests."""
+from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import F
 
-
-from partial_index import PartialIndex, PQ, ValidatePartialUniqueMixin
+from partial_index import PartialIndex, PQ, PF, ValidatePartialUniqueMixin
 
 
 class AB(models.Model):
@@ -96,5 +95,5 @@ class ComparisonQ(models.Model):
 
     class Meta:
         indexes = [
-            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=F('b'))),
+            PartialIndex(fields=['a', 'b'], unique=True, where=PQ(a=PF('b'))),
         ]

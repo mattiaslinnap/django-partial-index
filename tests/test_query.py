@@ -3,10 +3,9 @@ Tests for SQL CREATE INDEX statements.
 """
 
 from django.db import connection
-from django.db.models import F
 from django.test import TestCase
 
-from partial_index import query, PQ
+from partial_index import query, PQ, PF
 from testapp.models import AB, ABC
 
 
@@ -35,7 +34,7 @@ class QueryToSqlTest(TestCase):
         self.assertQSql(PQ(a__exact='Hello'), '"testapp_ab"."a" = \'Hello\'')
 
     def test_a_equals_b(self):
-        self.assertQSql(PQ(a=F('b')), '"testapp_ab"."a" = ("testapp_ab"."b")')
+        self.assertQSql(PQ(a=PF('b')), '"testapp_ab"."a" = ("testapp_ab"."b")')
 
 
 class QueryMentionedFieldsTest(TestCase):
@@ -62,13 +61,13 @@ class QueryMentionedFieldsTest(TestCase):
         self.assertMentioned(PQ(a=12, b__isnull=True), ['a', 'b'])
 
     def test_f_equal(self):
-        self.assertMentioned(PQ(a=F('b')), ['a', 'b'])
+        self.assertMentioned(PQ(a=PF('b')), ['a', 'b'])
 
     def test_f_add(self):
-        self.assertMentioned(PQ(a=F('b') + F('c') + 1), ['a', 'b', 'c'])
+        self.assertMentioned(PQ(a=PF('b') + PF('c') + 1), ['a', 'b', 'c'])
 
     def test_contains_f(self):
-        self.assertMentioned(PQ(a__contains='Hello', b=F('c')), ['a', 'b', 'c'])
+        self.assertMentioned(PQ(a__contains='Hello', b=PF('c')), ['a', 'b', 'c'])
 
     def test_or(self):
         self.assertMentioned(PQ(a=12) | PQ(b=34), ['a', 'b'])

@@ -1,6 +1,5 @@
 """Django Q object to SQL string conversion."""
-import django
-from django.db.models import expressions, Q
+from django.db.models import expressions, Q, F
 from django.db.models.sql import Query
 
 
@@ -12,24 +11,62 @@ class Vendor(object):
 class PQ(Q):
     """Compatibility class for Q-objects.
 
-    Django 2.0 Q-objects are suitable on their own, but Django 1.11 needs a better deep equality comparison.
+    Django 2.0 Q-objects are suitable on their own, but Django 1.11 needs a better deep equality comparison and a deconstruct() method.
 
     PartialIndex definitions in model classes should use PQ to avoid problems when upgrading projects.
     """
-    if tuple(django.VERSION[:2]) < (2, 0):
-        def __eq__(self, other):
-            if self.__class__ != other.__class__:
-                return False
-            if (self.connector, self.negated) == (other.connector, other.negated):
-                return self.children == other.children
+
+    def __eq__(self, other):
+        """Copied from Django 2.0 django.utils.tree.Node.__eq__()"""
+        if self.__class__ != other.__class__:
             return False
+        if (self.connector, self.negated) == (other.connector, other.negated):
+            return self.children == other.children
+        return False
 
     def deconstruct(self):
-        path, args, kwargs = super(PQ, self).deconstruct()
+        """Copied from Django 2.0 django.db.models.query_utils.Q.deconstruct()"""
+        path = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
         # Keep imports clean in migrations
         if path.startswith('partial_index.query.'):
             path = path.replace('partial_index.query.', 'partial_index.')
+
+        args, kwargs = (), {}
+        if len(self.children) == 1 and not isinstance(self.children[0], Q):
+            child = self.children[0]
+            kwargs = {child[0]: child[1]}
+        else:
+            args = tuple(self.children)
+            if self.connector != self.default:
+                kwargs = {'_connector': self.connector}
+        if self.negated:
+            kwargs['_negated'] = True
         return path, args, kwargs
+
+
+class PF(F):
+    """Compatibility class for F-expressions.
+
+    Django 2.0 F-expressions are suitable on their own, but Django 1.11 a deconstruct() method.
+
+    PartialIndex definitions in model classes should use PF to avoid problems when upgrading projects.
+    """
+
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+        return self.name == other.name
+
+    def deconstruct(self):
+        path = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
+        # Keep imports clean in migrations
+        if path.startswith('partial_index.query.'):
+            path = path.replace('partial_index.query.', 'partial_index.')
+
+        args = (self.name, )
+        kwargs = {}
+        return path, args, kwargs
+
 
 
 def get_valid_vendor(schema_editor):
