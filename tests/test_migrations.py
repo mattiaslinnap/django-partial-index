@@ -46,6 +46,7 @@ class MigrationsTestCase(TestCase):
         content = re.sub(r'\s', '', content)
         self.assertEqual(len(re.findall(r"migrations\.AddIndex\(model_name='[a-z]+',index=partial_index\.PartialIndex\(fields=\[", content)), 4)
         self.assertEqual(len(re.findall(r"where=partial_index\.PQ\(", content)), 4)
+        self.assertEqual(len(re.findall(r"where=partial_index\.PQ\(a=partial_index\.PF\('b'\)\)\)", content)), 1)
         self.assertEqual(len(re.findall(r"where_postgresql", content)), 0)
         self.assertEqual(len(re.findall(r"where_sqlite", content)), 0)
         self.delete_migrations_files()
