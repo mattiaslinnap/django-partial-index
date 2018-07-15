@@ -24,6 +24,13 @@ class PQ(Q):
                 return self.children == other.children
             return False
 
+    def deconstruct(self):
+        path, args, kwargs = super(PQ, self).deconstruct()
+        # Keep imports clean in migrations
+        if path.startswith('partial_index.query.'):
+            path = path.replace('partial_index.query.', 'partial_index.')
+        return path, args, kwargs
+
 
 def get_valid_vendor(schema_editor):
     vendor = schema_editor.connection.vendor

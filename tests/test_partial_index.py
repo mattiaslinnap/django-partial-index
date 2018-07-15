@@ -93,8 +93,8 @@ class PartialIndexSingleTextWhereTest(SimpleTestCase):
         self.assertEqual(kwargs['fields'], ['a', 'b'])
         self.assertEqual(kwargs['unique'], True)
         self.assertEqual(kwargs['where'], 'a IS NULL')
-        self.assertEqual(kwargs['where_postgresql'], '')
-        self.assertEqual(kwargs['where_sqlite'], '')
+        self.assertNotIn('where_postgresql', kwargs)
+        self.assertNotIn('where_sqlite', kwargs)
         self.assertIn('name', kwargs)  # Exact value of name is not tested.
 
     def test_suffix(self):
@@ -159,7 +159,7 @@ class PartialIndexMultiTextWhereTest(SimpleTestCase):
         self.assertEqual((), args)
         self.assertEqual(kwargs['fields'], ['a', 'b'])
         self.assertEqual(kwargs['unique'], True)
-        self.assertEqual(kwargs['where'], '')
+        self.assertNotIn('where', kwargs)
         self.assertEqual(kwargs['where_postgresql'], 'a = false')
         self.assertEqual(kwargs['where_sqlite'], 'a = 0')
         self.assertIn('name', kwargs)  # Exact value of name is not tested.
@@ -206,15 +206,15 @@ class PartialIndexSinglePQWhereTest(SimpleTestCase):
     def test_repr(self):
         self.assertEqual(repr(self.idx), "<PartialIndex: fields='a, b', unique=True, where=<PQ: (AND: ('a__isnull', True))>>")
 
-    def test_deconstruct(self):
+    def test_deconstruct_pq(self):
         path, args, kwargs = self.idx.deconstruct()
         self.assertEqual(path, 'partial_index.PartialIndex')
         self.assertEqual((), args)
         self.assertEqual(kwargs['fields'], ['a', 'b'])
         self.assertEqual(kwargs['unique'], True)
         self.assertEqual(kwargs['where'], PQ(a__isnull=True))
-        self.assertEqual(kwargs['where_postgresql'], '')
-        self.assertEqual(kwargs['where_sqlite'], '')
+        self.assertNotIn('where_postgresql', kwargs)
+        self.assertNotIn('where_sqlite', kwargs)
         self.assertIn('name', kwargs)  # Exact value of name is not tested.
 
     def test_suffix(self):

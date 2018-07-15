@@ -74,9 +74,11 @@ class PartialIndex(Index):
         if path.startswith('partial_index.index'):
             path = path.replace('partial_index.index', 'partial_index')
         kwargs['unique'] = self.unique
-        kwargs['where'] = self.where
-        kwargs['where_postgresql'] = self.where_postgresql
-        kwargs['where_sqlite'] = self.where_sqlite
+        if self.where:
+            kwargs['where'] = self.where
+        else:
+            kwargs['where_postgresql'] = self.where_postgresql
+            kwargs['where_sqlite'] = self.where_sqlite
         return path, args, kwargs
 
     def get_sql_create_template_values(self, model, schema_editor, using):

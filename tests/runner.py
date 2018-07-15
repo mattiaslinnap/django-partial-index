@@ -20,7 +20,7 @@ DATABASES_FOR_DB = {
     'sqlite': {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': join(REPO_DIR, 'db.sqlite3'),
+            'NAME': join(REPO_DIR, 'partial_index.sqlite3'),
         }
     },
 }
@@ -30,7 +30,7 @@ def main(args):
     # Since this test suite is designed to be ran outside of ./manage.py test, we need to do some setup first.
     import django
     from django.conf import settings
-    settings.configure(INSTALLED_APPS=['testapp'], DATABASES=DATABASES_FOR_DB[args.db])
+    settings.configure(INSTALLED_APPS=['testapp'], DATABASES=DATABASES_FOR_DB[args.db], DB_NAME=args.db)
     django.setup()
 
     from django.test.runner import DiscoverRunner
