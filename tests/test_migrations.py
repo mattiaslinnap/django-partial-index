@@ -68,3 +68,4 @@ class MigrationsTestCase(TestCase):
         self.makemigrations()
         migrateoutput = self.migrate()
         self.assertIn(b'Applying testmigrationsapp.0001_initial... OK', migrateoutput)
+        self.delete_migrations_files()
