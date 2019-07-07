@@ -14,8 +14,16 @@ More info on partial indexes:
 * https://sqlite.org/partialindex.html
 
 
-## Table of Contents
+## Partial indexes now included in Django
 
+Since the release of [Django 2.2 LTS](https://docs.djangoproject.com/en/2.2/releases/2.2/) in April 2019,
+partial indexes are now supported by standard Django.
+
+These are called [index conditions](https://docs.djangoproject.com/en/2.2/ref/models/indexes/#condition) there.
+
+The django-partial-index package will live on in maintenance mode.
+
+It can be useful if you are maintaining a project on and older version of Django, or wish to migrate django-partial-index indexes to Django 2.2 style on your own schedule.
 
 ## Install
 
@@ -23,9 +31,17 @@ More info on partial indexes:
 
 Requirements:
 
-* Django 1.11 (with Python 2.7 and 3.4 - 3.6), or
-* Django 2.0 (with Python 3.4 - 3.6).
+* Django 1.11, 2.0, 2.1 or 2.2,
+* Python 2.7, 3.4, 3.5, 3.6 or 3.7 (as supported by the Django version),
 * PostgreSQL or SQLite database backend. (Partial indexes are not supported on MySQL, and require major hackery on Oracle.)
+
+All Python versions which Django supports are also supported by this package. These are:
+
+* Django 1.11 - Python 2.7 and 3.4 - 3.7,
+* Django 2.0 - Python 3.4 - 3.7,
+* Django 2.1 - Python 3.5 - 3.7,
+* Django 2.2 - Python 3.5 - 3.7.
+
 
 ## Usage
 
@@ -157,7 +173,11 @@ class TextExample(models.Model):
 
 ## Version History
 
-### 0.5.2 (latest)
+### 0.6.0 (latest)
+* Add support for Django 2.2.
+* Document (already existing) support for Django 2.1 and Python 3.7.
+
+### 0.5.2
 * Fix makemigrations for Django 1.11.
 * Make sure PQ and PF are imported directly from partial_index in migration files.
 
@@ -194,4 +214,3 @@ class TextExample(models.Model):
 
 * Add a validation mixin for DRF Serializers.
 * Remove support for text-based where conditions.
-* Eventually make this package obsolete by getting it merged into Django's contrib.postgres module.
