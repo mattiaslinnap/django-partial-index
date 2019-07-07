@@ -5,7 +5,7 @@ import subprocess
 import re
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TransactionTestCase
 import os
 from os.path import abspath, dirname, exists, join
 
@@ -19,7 +19,7 @@ def listmigs():
     return list(sorted(fname for fname in os.listdir(MIGS) if fname not in IGNORE and not fname.endswith('.pyc')))
 
 
-class MigrationsTestCase(TestCase):
+class MigrationsTestCase(TransactionTestCase):
 
     def delete_migrations_files(self):
         for fname in listmigs():

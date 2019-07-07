@@ -2,7 +2,7 @@
 Tests for SQL CREATE INDEX statements.
 """
 from django.db import connection
-from django.test import TestCase
+from django.test import TransactionTestCase
 import re
 
 from partial_index import PartialIndex, PQ
@@ -38,7 +38,7 @@ COMPARISON_Q_SQL =    r'^CREATE UNIQUE INDEX "testapp_[a-zA-Z0-9_]+_partial" ' +
                       r'WHERE "testapp_comparisonq"."a" = \("testapp_comparisonq"."b"\);?$'
 
 
-class PartialIndexSqlTest(TestCase):
+class PartialIndexSqlTest(TransactionTestCase):
     """Check that the schema editor generates valid SQL for the index."""
 
     def schema_editor(self):
@@ -121,7 +121,7 @@ class PartialIndexSqlTest(TestCase):
         self.assertContainsMatch(editor.collected_sql, COMPARISON_Q_SQL)
 
 
-class PartialIndexCreateTest(TestCase):
+class PartialIndexCreateTest(TransactionTestCase):
     """Check that the index really can be added to and removed from the model in the DB."""
 
     def schema_editor(self):

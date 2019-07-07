@@ -2,13 +2,13 @@
 Tests for actual use of the indexes after creating models with them.
 """
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.utils import timezone
 
 from testapp.models import User, Room, RoomBookingText, JobText, ComparisonText, RoomBookingQ, JobQ, ComparisonQ
 
 
-class PartialIndexRoomBookingTest(TestCase):
+class PartialIndexRoomBookingTest(TransactionTestCase):
     """Test that partial unique constraints work as expected when inserting data to the db.
 
     Models and indexes are created when django creates the test db, they do not need to be set up.
@@ -61,7 +61,7 @@ class PartialIndexRoomBookingTest(TestCase):
             RoomBookingQ.objects.create(user=self.user1, room=self.room1)
 
 
-class PartialIndexJobTest(TestCase):
+class PartialIndexJobTest(TransactionTestCase):
     """Test that partial unique constraints work as expected when inserting data to the db.
 
     Models and indexes are created when django creates the test db, they do not need to be set up.
@@ -107,7 +107,7 @@ class PartialIndexJobTest(TestCase):
         self.assertEqual(job1.order, job2.order)
 
 
-class PartialIndexComparisonTest(TestCase):
+class PartialIndexComparisonTest(TransactionTestCase):
     """Test that partial unique constraints work as expected when inserting data to the db.
 
     Models and indexes are created when django creates the test db, they do not need to be set up.

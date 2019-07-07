@@ -4,13 +4,13 @@ Tests for actual use of the indexes after creating models with them.
 import datetime
 
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from testapp.forms import RoomBookingAllFieldsForm, RoomBookingNoConditionFieldForm, RoomBookingJustRoomForm, RoomBookingTextForm
 from testapp.models import User, Room, RoomBookingQ
 
 
-class OnlyQTestCase(TestCase):
+class OnlyQTestCase(TransactionTestCase):
     def test_text_condition_improperlyconfigured(self):
         form = RoomBookingTextForm(data={'user': 1, 'room': 1})
         with self.assertRaises(ImproperlyConfigured):
@@ -77,17 +77,17 @@ class FormTestCase(object):
         self.assertFalse(form.errors)
 
 
-class AllFieldsFormTest(FormTestCase, TestCase):
+class AllFieldsFormTest(FormTestCase, TransactionTestCase):
     """Test that partial unique validation on a ModelForm works when all fields are present on the form."""
     formclass = RoomBookingAllFieldsForm
 
 
-class NoConditionFieldFormTest(FormTestCase, TestCase):
+class NoConditionFieldFormTest(FormTestCase, TransactionTestCase):
     """Test that partial unique validation on a ModelForm works when all index fields, but not the condition field are present on the form."""
     formclass = RoomBookingNoConditionFieldForm
 
 
-class SingleFieldFormTest(FormTestCase, TestCase):
+class SingleFieldFormTest(FormTestCase, TransactionTestCase):
     """Test that partial unique validation on a ModelForm works when not all unique fields are present on the form.
 
     These have to be provided from an existing instance.

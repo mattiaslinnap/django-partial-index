@@ -3,13 +3,13 @@ Tests for SQL CREATE INDEX statements.
 """
 
 from django.db import connection
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from partial_index import query, PQ, PF
 from testapp.models import AB, ABC
 
 
-class QueryToSqlTest(TestCase):
+class QueryToSqlTest(TransactionTestCase):
     """Check that Q object to SQL transformation is valid."""
 
     def schema_editor(self):
@@ -37,7 +37,7 @@ class QueryToSqlTest(TestCase):
         self.assertQSql(PQ(a=PF('b')), '"testapp_ab"."a" = ("testapp_ab"."b")')
 
 
-class QueryMentionedFieldsTest(TestCase):
+class QueryMentionedFieldsTest(TransactionTestCase):
     def assertMentioned(self, q, fields):
         self.assertEqual(set(query.q_mentioned_fields(q, ABC)), set(fields))
 
