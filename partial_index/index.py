@@ -1,6 +1,9 @@
 from django.db.models import Index, Q
 from django.utils import six
+from django.utils.encoding import force_bytes
+import hashlib
 import warnings
+
 
 from . import query
 
@@ -150,3 +153,14 @@ class PartialIndex(Index):
             'longer than 3 characters?'
         )
         self.check_name()
+
+    @staticmethod
+    def _hash_generator(*args):
+        """Copied from Django 2.1 for compatibility. In Django 2.2 this has been moved into django.db.backends.utils.names_digest().
+
+        Note that even if Django changes the hash calculation in the future, we should not - that would cause index renames on Django version upgrade.
+        """
+        h = hashlib.md5()
+        for arg in args:
+            h.update(force_bytes(arg))
+        return h.hexdigest()[:6]
