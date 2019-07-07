@@ -1,6 +1,6 @@
 # Provide a nicer error message than failing to import models.Index.
 
-VERSION = (0, 5, 2)
+VERSION = (0, 6, 0)
 __version__ = '.'.join(str(v) for v in VERSION)
 
 
